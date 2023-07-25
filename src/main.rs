@@ -17,15 +17,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         None => write!(out, "encounter {} ", log.encounter_id())?,
     }
 
-    let outcome = match log.analyzer().and_then(|a| a.outcome()) {
-        Some(evtclib::Outcome::Success) => "kill",
-        Some(evtclib::Outcome::Failure) => "wipe",
-        None => "crash",
-    };
-    write!(out, "{outcome}")?;
+    if let Some(analyzer) = log.analyzer() {
+        if analyzer.is_cm() {
+            write!(out, "CM ")?;
+        }
+        let outcome = match analyzer.outcome() {
+            Some(evtclib::Outcome::Success) => "kill after ",
+            Some(evtclib::Outcome::Failure) => "wipe after ",
+            None => "fighting for ",
+        };
+        write!(out, "{outcome}")?;
+    }
 
     let duration = humantime::Duration::from(std::time::Duration::from_millis(log.span()));
-    write!(out, " after {duration} ")?;
+    write!(out, "{duration} ")?;
 
     if let Some(timestamp) = log.local_end_timestamp().and_then(|unix_timestamp| {
         chrono::NaiveDateTime::from_timestamp_opt(unix_timestamp.into(), 0)
