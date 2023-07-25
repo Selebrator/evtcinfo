@@ -51,6 +51,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             None => writeln!(out, " {:12}", player.profession()),
         }?;
     }
+
+    if log.errors().len() > 0 {
+        writeln!(out)?;
+        writeln!(out, "Errors in log")?;
+        for error in log.errors() {
+            writeln!(out, "  {error}")?;
+        }
+    }
     out.flush()?;
     Ok(())
 }
