@@ -4,7 +4,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let file_path: String = std::env::args()
         .nth(1)
         .ok_or("First (and only) argument must be the path to a zevtc file")?;
-    let log = evtclib::process_file(file_path, evtclib::Compression::Zip)?;
+    let compression = if file_path.ends_with(".zip") || file_path.ends_with(".zevtc") {
+        evtclib::Compression::Zip
+    } else {
+        evtclib::Compression::None
+    };
+    let log = evtclib::process_file(file_path, compression)?;
     let mut out = std::io::BufWriter::new(std::io::stdout().lock());
 
     match log.encounter() {
